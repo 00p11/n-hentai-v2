@@ -111,9 +111,12 @@ class Entry {
 
     getCover() {
         const div = document.querySelector('div#cover');
-        const imgUrl = div.querySelector('img').src;
-        const id = parseInt(imgUrl.split('/')[4]);
-        return {url: imgUrl, id: id};
+        const img = div.querySelector('img')
+        img.addEventListener('load', () => {
+            const imgUrl = img.src;
+            const id = parseInt(imgUrl.split('/')[4]);
+            return {url: imgUrl, id: id};
+        })
     }
 }
 
@@ -168,13 +171,17 @@ class Popup {
 
 // Firefox, change for chromium
 async function saveEntry() {
-    await browser.runtime.sendMessage({action: "saveEntry", value: entry}, (response) => {
-        if (response.sucess) {
-            popup.info("Succes", "Entry saved sucefusly!")
-        } else if (response.sucess == false && response.reason == "duplicate") {
-            popup.error("Duplicate", "The entry you tried to save is duplicate.")
-        }
-    })
+    const response = await browser.runtime.sendMessage({ action: "saveEntry", value: entry });
+    console.log(response)
+    if (response.success == true && response.reason == "saved") {
+        popup.info("Entry saved", "Entry " + entry.title1.before + " " + entry.title1.pretty + " " + entry.title1.after + " saved successfully!");
+    } else if (response.success === false && response.reason === "duplicate") {
+        popup.error("Duplicate", "The entry you tried to save is a duplicate.");
+    } else if (response.success === true && response.reason === "updated") {
+        popup.info("Entry updated", "The entry you tried to save is a duplicate.");
+    } else {
+        popup.error("Unknown response:", response);
+    }
 }
 
 async function setLocalStorage(key, value) {

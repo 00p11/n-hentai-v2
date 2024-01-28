@@ -23,7 +23,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
             await setLocalStorage("entries", entries);
 
-            sendResponse({ success: true });
+            sendResponse({ success: true, reason: "saved" });
         } catch (error) {
             console.error("Error:", error);
             sendResponse({ success: false, reason: "error", error: error.message });
