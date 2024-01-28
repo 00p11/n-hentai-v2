@@ -111,12 +111,9 @@ class Entry {
 
     getCover() {
         const div = document.querySelector('div#cover');
-        const img = div.querySelector('img')
-        img.addEventListener('load', () => {
-            const imgUrl = img.src;
-            const id = parseInt(imgUrl.split('/')[4]);
-            return {url: imgUrl, id: id};
-        })
+        const imgUrl = div.querySelector('img').src;
+        const id = parseInt(imgUrl.split('/')[4]);
+        return {url: imgUrl, id: id};
     }
 }
 
