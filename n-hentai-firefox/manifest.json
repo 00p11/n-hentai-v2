@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "My nHentai List",
+  "description": "Easy and accessible way to improve your life.",
+  "version": "1.1",
+  "icons": {
+    "16": "icons/favicon.png",
+    "32": "icons/favicon.png",
+    "64": "icons/favicon.png"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://nhentai.net/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://nhentai.net/*"],
+      "js": ["main.js"]
+    }
+  ]
+}
