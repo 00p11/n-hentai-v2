@@ -8,12 +8,16 @@
     "32": "icons/favicon.png",
     "64": "icons/favicon.png"
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "unlimitedStorage" ],
   "host_permissions": [
     "https://nhentai.net/*"
   ],
   "action": {
     "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
   },
   "content_scripts": [
     {

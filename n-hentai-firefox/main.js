@@ -1,7 +1,8 @@
 console.log("v2 loaded!")
 
+
 class Entry {
-    constructor(id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded) {
+    constructor(id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded, cover) {
         this.id = id
         this.title1 = title1
         this.title2 = title2
@@ -14,6 +15,7 @@ class Entry {
         this.categories = categories
         this.pages = pages
         this.uploaded = uploaded
+        this.cover = cover
     }
 
     constructFromPage() {
@@ -35,11 +37,12 @@ class Entry {
             this.pages = parseInt(tagInfo["Pages"][0]);
             this.uploaded = tagInfo["Uploaded"];
 
-            const popup = new Popup("Inforamtions grabed sucefusly", this.title1)
-            popup.show()
-            console.log(popup)
+            this.cover = this.getCover()
+
+            popup.info("Data grabed sucefusly", titles["title1"]["before"] + " " + titles["title1"]["pretty"] + " " + titles["title1"]["after"])
         } catch(err) {
-            new Popup("Error", err).show()
+            popup.error("Error", err, 5000)
+            console.error(err)
         }
     }
 
@@ -64,7 +67,7 @@ class Entry {
             const afterText = afterSpan.textContent.trim();
 
             title1 = { before: beforeText, pretty: prettyText, after: afterText }
-        }
+        } else {title1 = undefined}
 
         let title2 = info.querySelector('h2.title');
         if (title2) {
@@ -77,7 +80,7 @@ class Entry {
             const afterText = afterSpan.textContent.trim();
 
             title2 = { before: beforeText, pretty: prettyText, after: afterText }
-        }
+        } else {title2 = undefined};
         return {title1: title1, title2: title2};
     }   
 
@@ -105,32 +108,36 @@ class Entry {
             return tagGroups;
         }
     }
+
+    getCover() {
+        const div = document.querySelector('div#cover');
+        const imgUrl = div.querySelector('img').src;
+        const id = parseInt(imgUrl.split('/')[4]);
+        return {url: imgUrl, id: id};
+    }
 }
 
 
 class Popup {
-    constructor(title, text) {
-        this.title = title
-        this.text = text
+    constructor() {
         this.popup = document.createElement('div');
     }
 
-    error(posTop = 0, posLeft = 0) {
-        this.create(posTop, posLeft, false, false, "#0303037f", "red", "1px solid red")
-        this.show()
+    error(title, text, duration = 2500, clickToHide = true, posTop = 0, posLeft = 0) {
+        this.pop(title, text, posTop, posLeft, false, false, "#030303bd", "red", "1px solid red")
+        this.show(duration, clickToHide)
     }
 
-    info(posTop = 0, posLeft = 0) {
-        this.create(posTop, posLeft)
-        this.show()
+    info(title, text, duration = 2500, clickToHide = true, posTop = 0, posLeft = 0) {
+        this.pop(title, text, posTop, posLeft)
+        this.show(duration, clickToHide)
     }
 
-    
-    create(posTop, posLeft, translateX = false, translateY = false, backgroundColor = "#303037f", color = "white", border = "1px solid #ed2553") {
+    pop(title, text, posTop, posLeft, translateX = false, translateY = false, backgroundColor = "#030303bd", color = "white", border = "1px solid #ed2553") {
         this.popup.id = 'myPopup';
         this.popup.innerHTML = `
-        <h2>`+ this.title +`</h2>
-        <p>`+ this.text +`</p>
+        <h2>`+ title +`</h2>
+        <p>`+ text +`</p>
         `
 
         this.popup.style.cssText = 'position: fixed; top: '+ posTop +'%; left: '+ posLeft +'%; background-color: '+ backgroundColor +'; color: '+ color +'; font-family: Noto Sans,sans-serif; border: '+ border +'; border-radius: 8px; padding: 20px;';
@@ -145,6 +152,7 @@ class Popup {
         document.body.appendChild(this.popup);
     }
 
+    
     show(duration = 2500, clickToHide = true) {
         this.popup.style.display = 'block';
         if (clickToHide) { this.popup.addEventListener("click", ()=> { this.hide() }) }
@@ -158,16 +166,43 @@ class Popup {
     }
 }
 
+// Firefox, change for chromium
+async function saveEntry() {
+    await browser.runtime.sendMessage({action: "saveEntry", value: entry}, (response) => {
+        if (response.sucess) {
+            popup.info("Succes", "Entry saved sucefusly!")
+        } else if (response.sucess == false && response.reason == "duplicate") {
+            popup.error("Duplicate", "The entry you tried to save is duplicate.")
+        }
+    })
+}
+
+async function setLocalStorage(key, value) {
+    browser.runtime.sendMessage({
+        action: "setData",
+        key: key,
+        value: value
+    })
+}
+async function getLocalStorage(key) {
+    browser.runtime.sendMessage({
+        action: "getData",
+        key: key
+    })
+}
+
 // Key bindings
 addEventListener('keydown', (e) => {
-    if (e.key === "n" || e.key === "N") { 
-        const popup = new Popup("Data:", toString(entry.title1))
-        popup.info()
-    }
+    if (e.key === "n" || e.key === "N") { saveEntry() };
 })
 
 
 function init() {
-    const entry = new Entry()
     entry.constructFromPage()
+    console.log(entry)
 }
+
+const entry = new Entry()
+const popup = new Popup()
+
+init()
