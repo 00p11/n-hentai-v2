@@ -9,26 +9,25 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
                 // Checks if duplicate
                 if (JSON.stringify(message.value) == JSON.stringify(entries[i])) {
                     console.log("Duplicate")
-                    sendResponse({ success: false, reason: "duplicate" })
-                    return;
+                    return ({ success: false, reason: "duplicate" });
                 } else if (message.value.id == entries[i].id) {
                     console.log("Updated")
                     entries[i] = message.value
                     await setLocalStorage("entries", entries);
-                    sendResponse({ success: true, reason: "updated" })
-                    return;
+                    return ({ success: true, reason: "updated" });
                 }
             }
             entries.push(message.value);
 
             await setLocalStorage("entries", entries);
 
-            sendResponse({ success: true, reason: "saved" });
+            return ({ success: true, reason: "saved" });
         } catch (error) {
             console.error("Error:", error);
-            sendResponse({ success: false, reason: "error", error: error.message });
+            return ({ success: false, reason: "error", error: error.message });
         }
     }
+    return true;
 });
 
 async function setLocalStorage(key, value) {

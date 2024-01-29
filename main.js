@@ -35,7 +35,7 @@ class Entry {
             this.languages = tagInfo["Languages"];
             this.categories = tagInfo["Categories"];
             this.pages = parseInt(tagInfo["Pages"][0]);
-            this.uploaded = tagInfo["Uploaded"];
+            this.uploaded = "penis TEST";
 
             this.cover = this.getCover()
 
@@ -169,13 +169,14 @@ class Popup {
 // Firefox, change for chromium
 async function saveEntry() {
     const response = await browser.runtime.sendMessage({ action: "saveEntry", value: entry });
-    console.log(response)
     if (response.success == true && response.reason == "saved") {
         popup.info("Entry saved", "Entry " + entry.title1.before + " " + entry.title1.pretty + " " + entry.title1.after + " saved successfully!");
     } else if (response.success === false && response.reason === "duplicate") {
         popup.error("Duplicate", "The entry you tried to save is a duplicate.");
     } else if (response.success === true && response.reason === "updated") {
-        popup.info("Entry updated", "The entry you tried to save is a duplicate.");
+        popup.info("Entry updated", "The entry you tried to save has duplicate id but something changed, so it was updated.");
+    } else if (response.success === false && response.reason === "error") {
+        popup.error("Error occure while saving", response.error);
     } else {
         popup.error("Unknown response:", response);
     }
@@ -203,7 +204,6 @@ addEventListener('keydown', (e) => {
 
 function init() {
     entry.constructFromPage()
-    console.log(entry)
 }
 
 const entry = new Entry()
