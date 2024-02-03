@@ -30,6 +30,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     } else if (message.action == "getEntries") {
         try {
             const value = await getLocalStorage('entries');
+            console.log(value)
             return ({ succes: true, reason: 'dataGet', value: value });
         } catch (error) {
             return ({ succes: false, reason: 'error', error: error.message })

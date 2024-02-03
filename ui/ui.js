@@ -64,7 +64,7 @@ const headers = [
     {
         id: 'cover',
         name: 'Cover',
-        visible: true
+        visible: false
     },
     {
         id: 'favorite',
@@ -79,7 +79,7 @@ const headers = [
     {
         id: 'note',
         name: 'Note',
-        visible: false
+        visible: true
     },
     {
         id: 'remove',
@@ -118,13 +118,13 @@ class Entry {
                 const headerID = optionalHeaders[i].id
                 switch (headerID) {
                     case 'id':
-                        var cell = row.appendChild(createElement('td', { 'class': headerID}))
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
                         cell.appendChild(createElement('a', { 'href': 'https://nhentai.net/g/' + this.id + '/' }, this.id))
                         break;
                 
                     case 'title1':
                     case 'title2':
-                        var cell = row.appendChild(createElement('td', { 'class': headerID}))
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
                         cell.appendChild(createElement('span', { 'class': 'before'}, this[headerID].before + " "))
                         cell.appendChild(createElement('span', { 'class': 'pretty'}, this[headerID].pretty + " "))
                         cell.appendChild(createElement('span', { 'class': 'after'}, this[headerID].after))
@@ -143,15 +143,89 @@ class Entry {
                             } else {
                                 this[headerID] = []
                         }}
-                        var cell = row.appendChild(createElement('td', { 'class': headerID}))
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
                         this[headerID].forEach((element) => {
                             cell.appendChild(createElement('span', {}, element))
                         })
                         break;
+                    
+                    case 'pages':
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        cell.appendChild(createElement('span', {}, this[headerID]))
+                        break;
+                        
+                    case 'uploaded':
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        const date = new Date(this[headerID])
+                        cell.appendChild(createElement('span', {}, date.toLocaleDateString()))
+                        break;
 
+                    case 'cover':
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        cell.appendChild(createElement('img', { 'src': this[headerID].url, 'style': 'height: 10rem;'}))
+                        break;
+
+                    case 'favorite': 
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        if (!this[headerID]) {this[headerID] = false}
+                        var span = cell.appendChild(createElement('span', {}, this[headerID]))
+                        cell.addEventListener('click', ()=> {
+                            this[headerID] = !this[headerID]
+                            span.innerHTML = this[headerID]
+                            this.saveData()
+                        })
+                        break;
+
+                    case 'rating':
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        const inputRating = cell.appendChild(createElement('input', {'type': 'number', 'min': '1', 'max': '10', 'step': '1', 'value': this[headerID]}))
+                        const ratingFunction = () => {
+                            var value = inputRating.value
+                            if (value < 1) {value = 1}
+                            if (value > 10) {value = 10}
+                            this[headerID] =  value
+                            inputRating.value = value
+                            this.saveData()
+                        }
+                        cell.addEventListener('focusout', () => {ratingFunction()})
+                        cell.addEventListener('click', () => {ratingFunction()})
+                        break;
+
+                    case 'note': 
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        if (!this[headerID] || this[headerID] == undefined) { this[headerID] = '' }
+                        var inputNotes = cell.appendChild(createElement('input', {'type': 'text', 'value': this[headerID]}))
+                        const noteFunction = () => {
+                            var value = inputNotes.value
+                            this[headerID] =  value
+                            inputNotes.value = value
+                            this.saveData()
+                        }
+                        cell.addEventListener('focusout', () => {noteFunction()})
+                        cell.addEventListener('click', () => {noteFunction()})
+                        break;
+
+
+                    // case 'remove':
+                    //     var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                    //     cell.appendChild(createElement('remove', {}, headerID))
+                    //     cell.addEventListener('click', () => {
+                    //         for (let i = 0; i < entries.length; i++) {
+                    //             if (entries[i] == this.id) {
+                    //                 console.log(entries.splice(i, 1))
+                    //             }
+                    //         }
+                    //     })
+                    //     break;
+                        
                 }
             }
         }
+    }
+
+    async saveData() {
+        // Optimaze
+        await browser.runtime.sendMessage({ action: "setEntries", value: entries })
     }
     
 }
@@ -185,8 +259,8 @@ function convertEntries(rawEntries) {
     const convertedEntries = [];
     entries.forEach((element) => {
         if (!(element instanceof Entry)) {
-            const { id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded, cover } = element; // Realy usefull line of code
-            const entry = new Entry(id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded, cover);
+            const { id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded, cover, favorite, rating, note } = element; // Realy usefull line of code
+            const entry = new Entry(id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded, cover, favorite, rating, note);
 
             convertedEntries.push(entry);
         } else if (element instanceof Entry) {
