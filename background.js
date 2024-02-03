@@ -1,8 +1,7 @@
 browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+    console.log("Received message:", message);
     if (message.action == "saveEntry") {
         try {
-            console.log("Received message from content script:", message);
-
             let entries = await getLocalStorage("entries");
             if (!entries) { entries = [] };
             for (let i = 0; i < entries.length; i++) {
@@ -26,8 +25,26 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             console.error("Error:", error);
             return ({ success: false, reason: "error", error: error.message });
         }
+
+    // Get and set entries
+    } else if (message.action == "getEntries") {
+        try {
+            const value = await getLocalStorage('entries');
+            return ({ succes: true, reason: 'dataGet', value: value });
+        } catch (error) {
+            return ({ succes: false, reason: 'error', error: error.message })
+        }
+    } else if (message.action == "setEntries") {
+        try {
+            const value = message.value;
+            setLocalStorage('entries', value);
+            return ({ succes: true, reason: 'dataSet' });
+        } catch (error) {
+            return ({ succes: false, reason: 'error', error: error.message });
+        }
     }
-    return true;
+        
+    return ({ success: false, reason: "unknown action"});
 });
 
 async function setLocalStorage(key, value) {
@@ -35,7 +52,7 @@ async function setLocalStorage(key, value) {
         await browser.storage.local.set({ [key]: value });
     } catch (error) {
         console.error("Error saving data:", error);
-        throw error; // Rethrow the error to propagate it
+        throw error; 
     }
 }
 

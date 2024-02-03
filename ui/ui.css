@@ -1,0 +1,47 @@
+#table {
+    width: 100%;
+}
+
+#table thead {
+    background-color: gray;
+}
+
+#table th:not(.status) {
+    text-align: left;
+    padding-left: 12px;
+}
+
+
+/* status */
+.status {
+    width: 0.1rem;
+}
+
+th.status {
+    background-color: white;
+    width: 0.01rem;
+}
+
+.status-reading {
+    background-color: green;    
+}
+
+.status-completed {
+    background-color: blue;
+
+}
+
+.pretty {
+    color: red;
+}
+
+.parodies *, .characters *, .tags * {
+    display: inline-flex;
+    background-color: rgba(0, 165, 0, 0.47);
+    border-radius: 4px;
+    margin: .13rem;
+}
+
+.row {
+    background-color: rgba(128, 128, 128, 0.314);
+}

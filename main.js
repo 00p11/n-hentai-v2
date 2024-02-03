@@ -1,7 +1,7 @@
 console.log("v2 loaded!")
 
 
-class Entry {
+class RawEntry {
     constructor(id, title1, title2, parodies, characters, tags, artists, groups, languages, categories, pages, uploaded, cover) {
         this.id = id
         this.title1 = title1
@@ -35,7 +35,7 @@ class Entry {
             this.languages = tagInfo["Languages"];
             this.categories = tagInfo["Categories"];
             this.pages = parseInt(tagInfo["Pages"][0]);
-            this.uploaded = "penis TEST";
+            this.uploaded = tagInfo['Uploaded'];
 
             this.cover = this.getCover()
 
@@ -206,7 +206,7 @@ function init() {
     entry.constructFromPage()
 }
 
-const entry = new Entry()
+const entry = new RawEntry()
 const popup = new Popup()
 
 init()
