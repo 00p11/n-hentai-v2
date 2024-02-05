@@ -198,6 +198,7 @@ async function getLocalStorage(key) {
 
 // Key bindings
 addEventListener('keydown', (e) => {
+    if (e.target instanceof HTMLInputElement) { return; }
     if (e.key === "n" || e.key === "N") { saveEntry() };
 })
 

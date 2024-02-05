@@ -6,15 +6,20 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             if (!entries) { entries = [] };
             for (let i = 0; i < entries.length; i++) {
                 // Checks if duplicate
-                if (JSON.stringify(message.value) == JSON.stringify(entries[i])) {
+
+                if (message.value.id == entries[i].id) {
                     console.log("Duplicate")
                     return ({ success: false, reason: "duplicate" });
-                } else if (message.value.id == entries[i].id) {
-                    console.log("Updated")
-                    entries[i] = message.value
-                    await setLocalStorage("entries", entries);
-                    return ({ success: true, reason: "updated" });
                 }
+                // if (JSON.stringify(message.value) == JSON.stringify(entries[i])) {
+                //     console.log("Duplicate")
+                //     return ({ success: false, reason: "duplicate" });
+                // } else if (message.value.id == entries[i].id) {
+                //     console.log("Updated")
+                //     entries[i] = message.value
+                //     await setLocalStorage("entries", entries);
+                //     return ({ success: true, reason: "updated" });
+                // }
             }
             entries.push(message.value);
 

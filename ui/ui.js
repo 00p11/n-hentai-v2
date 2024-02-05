@@ -14,42 +14,42 @@ const headers = [
     {
         id: 'title2',
         name: 'Alt. Title',
-        visible: false
+        visible: true
     },
     {
         id: 'parodies',
         name: 'Parodies',
-        visible: false
+        visible: true
     },
     {
         id: 'characters',
         name: 'Characters',
-        visible: false
+        visible: true
     },
     {
         id: 'tags',
         name: 'Tags',
-        visible: false
+        visible: true
     },
     {
         id: 'artists',
         name: 'Artists',
-        visible: false
+        visible: true
     },
     {
         id: 'groups',
         name: 'Groups',
-        visible: false
+        visible: true
     },
     {
         id: 'languages',
         name: 'Languages',
-        visible: false
+        visible: true
     },
     {
         id: 'categories',
         name: 'Categories',
-        visible: false
+        visible: true
     },
     {
         id: 'pages',
@@ -64,7 +64,7 @@ const headers = [
     {
         id: 'cover',
         name: 'Cover',
-        visible: false
+        visible: true
     },
     {
         id: 'favorite',
@@ -125,9 +125,11 @@ class Entry {
                     case 'title1':
                     case 'title2':
                         var cell = row.appendChild(createElement('td', { 'class': headerID }))
-                        cell.appendChild(createElement('span', { 'class': 'before'}, this[headerID].before + " "))
-                        cell.appendChild(createElement('span', { 'class': 'pretty'}, this[headerID].pretty + " "))
-                        cell.appendChild(createElement('span', { 'class': 'after'}, this[headerID].after))
+                        if (this[headerID]) {
+                            cell.appendChild(createElement('span', { 'class': 'before'}, this[headerID].before + " "))
+                            cell.appendChild(createElement('span', { 'class': 'pretty'}, this[headerID].pretty + " "))
+                            cell.appendChild(createElement('span', { 'class': 'after'}, this[headerID].after))
+                        }
                         break;
 
                     case 'parodies':
@@ -143,6 +145,7 @@ class Entry {
                             } else {
                                 this[headerID] = []
                         }}
+
                         var cell = row.appendChild(createElement('td', { 'class': headerID }))
                         this[headerID].forEach((element) => {
                             cell.appendChild(createElement('span', {}, element))
@@ -181,8 +184,7 @@ class Entry {
                         const inputRating = cell.appendChild(createElement('input', {'type': 'number', 'min': '1', 'max': '10', 'step': '1', 'value': this[headerID]}))
                         const ratingFunction = () => {
                             var value = inputRating.value
-                            if (value < 1) {value = 1}
-                            if (value > 10) {value = 10}
+                            if (value == '') {value = ''} else if (value < 1) {value = 1} else if (value > 10) {value = 10}
                             this[headerID] =  value
                             inputRating.value = value
                             this.saveData()
@@ -206,17 +208,22 @@ class Entry {
                         break;
 
 
-                    // case 'remove':
-                    //     var cell = row.appendChild(createElement('td', { 'class': headerID }))
-                    //     cell.appendChild(createElement('remove', {}, headerID))
-                    //     cell.addEventListener('click', () => {
-                    //         for (let i = 0; i < entries.length; i++) {
-                    //             if (entries[i] == this.id) {
-                    //                 console.log(entries.splice(i, 1))
-                    //             }
-                    //         }
-                    //     })
-                    //     break;
+                    case 'remove':
+                        var cell = row.appendChild(createElement('td', { 'class': headerID }))
+                        cell.appendChild(createElement('remove', {}, headerID))
+                        cell.addEventListener('click', () => {
+                            console.log('Dober')
+                            for (let k = 0; k < entries.length; k++) {
+                                console.log(entries[k].id)
+                                if (entries[k].id == this.id) {
+                                    console.log(entries[k])
+                                    entries.splice(k, 1)
+                                    row.style.display = 'none'
+                                    this.saveData()
+                                }
+                            }
+                        })
+                        break;
                         
                 }
             }
@@ -229,6 +236,40 @@ class Entry {
     }
     
 }
+
+
+function initSearch() {
+    const search = document.getElementById('search')
+    search.addEventListener('input', handleSearch)
+}
+
+function handleSearch() {
+    const search = document.getElementById('search')
+    const searchValue = search.value.toLowerCase()
+    entries.forEach(entry => { 
+        const title = entry.title1.pretty.toLowerCase()
+        const element = document.getElementById(entry.id);
+        if (title.includes(searchValue)) {
+            console.log(title);
+            element.style.display = 'table-row';
+
+            // TO FIX
+            // const regex = new RegExp(searchValue, 'gi');
+            // console.log(regex)
+            // const highlightedText = entry.innerHTML.replace(regex, match => `<span class="highlighted">${match}</span>`);
+            
+        } else {
+            element.style.display = 'none';
+            element.querySelectorAll('.highlighted').forEach(element => {element.classList.remove('highlighted')})
+        }
+        if (searchValue == '') {
+            element.style.display = 'table-row';
+            element.querySelectorAll('.highlighted').forEach(element => {element.classList.remove('highlighted')})
+        }
+    })
+}
+
+initSearch()
 
 
 function createRows() {
